@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Juvant — Augmenting Ingenuity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --void:       #080B14;
+    --void2:      #0D1117;
+    --card:       #161D2C;
+    --violet:     #A855F7;
+    --violet-mid: #7C3AED;
+    --cyan:       #22D3EE;
+    --offwhite:   #E8EEFA;
+    --slate:      #94A3B8;
+    --grad: linear-gradient(90deg, #A855F7, #22D3EE);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--offwhite);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── GRADIENT TEXT ── */
+  .grad { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(8,11,20,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(168,85,247,0.12);
+  }
+
+  .nav-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px; font-weight: 700; letter-spacing: 3px;
+  }
+
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a { color: var(--slate); text-decoration: none; font-size: 14px; letter-spacing: 0.5px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--offwhite); }
+
+  .nav-cta {
+    padding: 9px 22px; border-radius: 6px;
+    background: var(--grad); color: #fff;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+    text-decoration: none; transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 120px 24px 80px;
+    overflow: hidden;
+  }
+
+  /* Ambient glow blobs */
+  .blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); pointer-events: none;
+  }
+  .blob-1 { width: 500px; height: 500px; background: rgba(168,85,247,0.12); top: -100px; left: -100px; animation: drift 12s ease-in-out infinite alternate; }
+  .blob-2 { width: 400px; height: 400px; background: rgba(34,211,238,0.08); bottom: -80px; right: -80px; animation: drift 16s ease-in-out infinite alternate-reverse; }
+  .blob-3 { width: 300px; height: 300px; background: rgba(124,58,237,0.1); top: 40%; left: 50%; transform: translate(-50%,-50%); animation: drift 20s ease-in-out infinite alternate; }
+
+  @keyframes drift { from { transform: translate(0,0); } to { transform: translate(30px, 20px); } }
+  @keyframes drift3 { from { transform: translate(-50%,-50%); } to { transform: translate(calc(-50% + 20px), calc(-50% + 15px)); } }
+
+  .hero-label {
+    font-size: 11px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 28px;
+    opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(52px, 7vw, 96px);
+    line-height: 1.05; color: var(--offwhite);
+    max-width: 900px; margin-bottom: 28px;
+    opacity: 0; animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px); color: var(--slate);
+    max-width: 560px; line-height: 1.7; margin-bottom: 52px;
+    opacity: 0; animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-actions {
+    display: flex; gap: 16px; align-items: center;
+    opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    padding: 14px 32px; border-radius: 8px;
+    background: var(--grad); color: #fff;
+    font-size: 15px; font-weight: 500; letter-spacing: 0.3px;
+    text-decoration: none; transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-ghost {
+    padding: 14px 32px; border-radius: 8px;
+    border: 1px solid rgba(168,85,247,0.4); color: var(--offwhite);
+    font-size: 15px; font-weight: 400;
+    text-decoration: none; transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--violet); background: rgba(168,85,247,0.06); }
+
+  @keyframes fadeUp { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── SECTION ── */
+  section { position: relative; z-index: 1; }
+
+  .section-inner { max-width: 1080px; margin: 0 auto; padding: 100px 24px; }
+
+  .section-label {
+    font-size: 10px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--violet); margin-bottom: 16px; display: block;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.15; color: var(--offwhite);
+    max-width: 700px; margin-bottom: 20px;
+  }
+
+  .section-body {
+    font-size: 17px; color: var(--slate);
+    max-width: 560px; line-height: 1.75;
+  }
+
+  /* ── VISION SECTION ── */
+  .vision { background: var(--void2); }
+
+  .vision-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 48px; margin-top: 64px; align-items: start;
+  }
+
+  @media (max-width: 768px) { .vision-grid { grid-template-columns: 1fr; } }
+
+  .vision-quote {
+    font-family: 'DM Serif Display', serif; font-style: italic;
+    font-size: clamp(22px, 3vw, 32px); line-height: 1.4;
+    color: var(--offwhite); padding-left: 24px;
+    border-left: 3px solid var(--violet);
+  }
+
+  .vision-text p {
+    font-size: 16px; color: var(--slate); line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  /* ── PRINCIPLES ── */
+  .principles-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; margin-top: 64px;
+  }
+
+  @media (max-width: 768px) { .principles-grid { grid-template-columns: 1fr; } }
+
+  .principle {
+    padding: 40px 36px; background: var(--card);
+    transition: background 0.2s;
+  }
+  .principle:hover { background: #1a2236; }
+  .principle:first-child { border-radius: 12px 0 0 12px; }
+  .principle:last-child  { border-radius: 0 12px 12px 0; }
+
+  .principle-num {
+    font-size: 11px; letter-spacing: 3px; color: var(--violet);
+    margin-bottom: 20px; display: block;
+  }
+  .principle-title {
+    font-family: 'DM Serif Display', serif; font-size: 22px;
+    color: var(--offwhite); margin-bottom: 14px;
+  }
+  .principle-body { font-size: 14px; color: var(--slate); line-height: 1.75; }
+
+  /* ── PRODUCT ── */
+  .product-card {
+    margin-top: 64px; padding: 64px;
+    background: var(--card); border-radius: 16px;
+    border: 1px solid rgba(168,85,247,0.2);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+
+  @media (max-width: 768px) { .product-card { grid-template-columns: 1fr; padding: 40px; } }
+
+  .product-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 4px;
+    margin-bottom: 20px; display: block;
+  }
+
+  .product-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 3.5vw, 42px); line-height: 1.2;
+    color: var(--offwhite); margin-bottom: 20px;
+  }
+
+  .product-tagline {
+    font-family: 'DM Serif Display', serif; font-style: italic;
+    font-size: 18px; color: var(--cyan);
+    margin-bottom: 24px; padding: 16px 20px;
+    border-left: 2px solid var(--cyan);
+    background: rgba(34,211,238,0.04);
+  }
+
+  .product-body { font-size: 15px; color: var(--slate); line-height: 1.8; margin-bottom: 32px; }
+
+  .product-features { list-style: none; }
+  .product-features li {
+    font-size: 14px; color: var(--offwhite); padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .product-features li::before { content: '→'; color: var(--cyan); font-size: 14px; }
+
+  /* ── SVG SYMBOL ── */
+  .symbol-wrap { display: flex; align-items: center; justify-content: center; padding: 40px; }
+
+  /* ── TEAM ── */
+  .team { background: var(--void2); }
+
+  .team-card {
+    margin-top: 48px; padding: 48px;
+    background: var(--card); border-radius: 16px;
+    border-left: 4px solid var(--violet);
+    max-width: 680px;
+  }
+
+  .team-role { font-size: 11px; letter-spacing: 3px; color: var(--violet); margin-bottom: 12px; display: block; }
+  .team-name { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--offwhite); margin-bottom: 8px; }
+  .team-affil { font-size: 14px; color: var(--cyan); margin-bottom: 20px; }
+  .team-bio { font-size: 15px; color: var(--slate); line-height: 1.8; }
+
+  /* ── CTA ── */
+  .cta-section { text-align: center; }
+
+  .cta-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1.1; color: var(--offwhite);
+    margin-bottom: 24px; max-width: 700px; margin-left: auto; margin-right: auto;
+  }
+
+  .cta-sub { font-size: 17px; color: var(--slate); margin-bottom: 48px; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding: 40px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: var(--slate);
+  }
+
+  .footer-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 3px;
+  }
+
+  /* ── DIVIDER ── */
+  .div-line {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo grad">JUVANT</span>
+  <ul class="nav-links">
+    <li><a href="#vision">Vision</a></li>
+    <li><a href="#product">Product</a></li>
+    <li><a href="#team">Team</a></li>
+  </ul>
+  <a href="mailto:info@juvant.io" class="nav-cta">Get in touch</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <p class="hero-label">Juvant AI Srls</p>
+
+  <h1 class="hero-title">
+    We build AI agents that<br/>
+    <em style="font-style:italic; color: var(--offwhite);">augment</em>
+    <span class="grad"> human ingenuity.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Not replacements. Not assistants. Agents that stand alongside humans with equal dignity — amplifying what people do best.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#product" class="btn-primary">Meet Hardys</a>
+    <a href="mailto:info@juvant.io" class="btn-ghost">Contact us</a>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- VISION -->
+<section class="vision" id="vision">
+  <div class="section-inner">
+    <span class="section-label">Vision</span>
+    <h2 class="section-title">Two intelligences are better than one.</h2>
+
+    <div class="vision-grid">
+      <blockquote class="vision-quote">
+        "The question is not whether AI can think. The question is whether it can help humans think better."
+      </blockquote>
+      <div class="vision-text">
+        <p>Juvant takes its name from the Latin <em>iuvare</em> — to help, to benefit. Our mission is to build AI agents that don't replace human expertise, but amplify it.</p>
+        <p>We believe in the Licklider model of human-computer symbiosis: two different kinds of intelligence, each doing what it does best, creating something neither could alone.</p>
+        <p>Our symbol says it all: two arcs — human intelligence and artificial intelligence — converging toward a single luminous node. The meeting point is where something new emerges.</p>
+      </div>
+    </div>
+
+    <div class="principles-grid" style="margin-top: 80px;">
+      <div class="principle">
+        <span class="principle-num">01</span>
+        <h3 class="principle-title">Augmentation, not replacement</h3>
+        <p class="principle-body">Every Juvant agent is designed to amplify human capability, not substitute for it. The human remains in the loop — elevated.</p>
+      </div>
+      <div class="principle">
+        <span class="principle-num">02</span>
+        <h3 class="principle-title">Dignity by design</h3>
+        <p class="principle-body">Our agents interact with equal dignity. Not tools. Not assistants. Co-operators that respect the intelligence of everyone in the room.</p>
+      </div>
+      <div class="principle">
+        <span class="principle-num">03</span>
+        <h3 class="principle-title">Memory that matters</h3>
+        <p class="principle-body">Intelligence without memory is just reaction. Our agents learn longitudinally — building context over time that makes every interaction more valuable than the last.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- PRODUCT -->
+<section id="product">
+  <div class="section-inner">
+    <span class="section-label">Product</span>
+    <h2 class="section-title">Our first agent is in the classroom.</h2>
+
+    <div class="product-card">
+      <div>
+        <span class="product-name grad">HARDYS</span>
+        <h3 class="product-title">The AI Teaching Intelligence OS for Higher Education</h3>
+        <p class="product-tagline">Every student deserves a Hardy.</p>
+        <p class="product-body">
+          Named after G.H. Hardy — the Cambridge mathematician who recognized and amplified the genius of Ramanujan — Hardys is a platform of AI agents that act as second professors in the room.
+        </p>
+        <ul class="product-features">
+          <li>Direct, autonomous interaction with students</li>
+          <li>Cross-session memory and longitudinal learning</li>
+          <li>Socratic method at master's-level complexity</li>
+          <li>Teaching Intelligence reports for faculty and institutions</li>
+          <li>Built for executive education and professional masters</li>
+        </ul>
+      </div>
+
+      <!-- SVG Symbol -->
+      <div class="symbol-wrap">
+        <svg viewBox="0 0 200 200" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#A855F7"/>
+              <stop offset="100%" style="stop-color:#22D3EE"/>
+            </linearGradient>
+            <linearGradient id="sh" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#A855F7"/>
+              <stop offset="100%" style="stop-color:#22D3EE"/>
+            </linearGradient>
+            <filter id="fg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="fs"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <!-- Orbit circle -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="url(#sh)" stroke-width="1.5" opacity="0.4" filter="url(#fs)"/>
+          <!-- Hardy center -->
+          <circle cx="100" cy="100" r="16" fill="none" stroke="#A855F7" stroke-width="2" filter="url(#fs)"/>
+          <circle cx="100" cy="100" r="7" fill="#A855F7" filter="url(#fg)"/>
+          <!-- Ramanujan orbiting -->
+          <circle cx="170" cy="100" r="10" fill="url(#sg)" filter="url(#fg)"/>
+          <circle cx="170" cy="100" r="4" fill="#fff" opacity="0.9"/>
+          <!-- Trail -->
+          <circle cx="158" cy="66"  r="3.5" fill="#22D3EE" opacity="0.6"/>
+          <circle cx="133" cy="42"  r="2.8" fill="#22D3EE" opacity="0.45"/>
+          <circle cx="100" cy="30"  r="2.2" fill="#22D3EE" opacity="0.3"/>
+          <circle cx="67"  cy="42"  r="1.8" fill="#22D3EE" opacity="0.2"/>
+          <circle cx="42"  cy="66"  r="1.4" fill="#22D3EE" opacity="0.15"/>
+          <!-- Ambient -->
+          <circle cx="100" cy="8"   r="2.5" fill="#A855F7" opacity="0.35"/>
+          <circle cx="60"  cy="18"  r="1.8" fill="#A855F7" opacity="0.25"/>
+          <circle cx="140" cy="18"  r="1.8" fill="#22D3EE" opacity="0.25"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- TEAM -->
+<section class="team" id="team">
+  <div class="section-inner">
+    <span class="section-label">Founding Team</span>
+    <h2 class="section-title">Built from inside the classroom.</h2>
+    <p class="section-body">Juvant was not founded by observers of the education system. It was founded by someone inside it.</p>
+
+    <div class="team-card">
+      <span class="team-role">Founder & CEO</span>
+      <h3 class="team-name">Juvant AI Srls</h3>
+      <p class="team-affil">Co-founder, AI Driven Business Model Master · Università Cattolica del Sacro Cuore, Milan</p>
+      <p class="team-bio">Faculty member and AI educator with direct experience teaching AI Foundations to senior managers and international professionals. Co-founded the AI Driven Business Model master's program with Prof. Baroncelli at Cattolica. Hardys was built to solve a problem we faced ourselves — and still face every semester.</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-inner" style="text-align:center;">
+    <span class="section-label" style="display:block; text-align:center;">Contact</span>
+    <h2 class="cta-title">
+      Interested in what we're building?
+    </h2>
+    <p class="cta-sub">We're always open to conversations with investors, academic partners, and people who care about the future of learning.</p>
+    <a href="mailto:info@juvant.io" class="btn-primary" style="font-size:16px; padding: 16px 40px;">Get in touch</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo grad">JUVANT</span>
+  <span>Juvant AI Srls · Milano · juvant.io</span>
+  <span>© 2026 Juvant AI Srls</span>
+</footer>
+
+</body>
+</html>
